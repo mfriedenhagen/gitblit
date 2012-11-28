@@ -27,7 +27,6 @@
 *.directory
 /.gradle
 /projects.conf
-/pom.xml
 /deploy
 /*.jks
 /x509test
