@@ -261,7 +261,7 @@ public class LdapUserService extends GitblitUserService {
 
 	private void getTeamsFromLdap(LDAPConnection ldapConnection, String simpleUsername, SearchResultEntry loggingInUser, UserModel user) {
 		String loggingInUserDN = loggingInUser.getDN();
-		
+		ldapConnection = getLdapConnection();
 		user.teams.clear();		// Clear the users team memberships - we're going to get them from LDAP
 		String groupBase = settings.getString(Keys.realm.ldap.groupBase, "");
 		String groupMemberPattern = settings.getString(Keys.realm.ldap.groupMemberPattern, "(&(objectClass=group)(member=${dn}))");
