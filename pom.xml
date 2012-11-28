@@ -155,12 +155,12 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-ajp</artifactId>
-            <version>7.6.7.v20120910</version>            
+            <version>${jetty.version}</version>            
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
-            <version>7.6.7.v20120910</version>            
+            <version>${jetty.version}</version>            
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -174,11 +174,6 @@
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>resources</directory>
-            </resource>            
-        </resources>
         <sourceDirectory>src</sourceDirectory>
         <testSourceDirectory>tests</testSourceDirectory>
         <plugins>
@@ -187,10 +182,13 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
-                    <webXml>src/WEB-INF/web.xml</webXml>
-                    <packagingExcludes>
-                        
-                    </packagingExcludes>
+                    <webResources>
+                        <resource>
+                            <directory>resources</directory>
+                        </resource>
+                    </webResources>
+                    <webXml>src/WEB-INF/web.xml</webXml>                    
+                    <packagingExcludes>WEB-INF/lib/jetty-*${jetty.version}.jar</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>
@@ -201,5 +199,6 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <lucene.version>3.6.1</lucene.version>
+        <jetty.version>7.6.7.v20120910</jetty.version>
     </properties>
 </project>
