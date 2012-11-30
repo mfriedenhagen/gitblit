@@ -313,6 +313,7 @@ public class LdapUserService extends GitblitUserService {
 	}
 
 	private SearchResult doSearch(LDAPConnection ldapConnection, String base, String filter) {
+                ldapConnection = getLdapConnection();
 		try {
 			return ldapConnection.search(base, SearchScope.SUB, filter);
 		} catch (LDAPSearchException e) {
