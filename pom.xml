@@ -21,32 +21,36 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.6</version>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.6</version>
+            <version>${slf4j.version}</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- wicket -->
         <dependency>
             <groupId>org.apache.wicket</groupId>
             <artifactId>wicket</artifactId>
-            <version>1.4.21</version>
+            <version>${wicket.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.wicket</groupId>
             <artifactId>wicket-auth-roles</artifactId>
-            <version>1.4.21</version>
+            <version>${wicket.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.wicket</groupId>
             <artifactId>wicket-extensions</artifactId>
-            <version>1.4.21</version>
+            <version>${wicket.version}</version>
         </dependency>
+        
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk15on</artifactId>
@@ -96,11 +100,7 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <version>1.4.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>jakarta-regexp</groupId>
@@ -121,6 +121,7 @@
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
             <version>1.17</version>
+            <scope>provided</scope><!-- only needed for GO -->
         </dependency>
         <dependency>
             <groupId>com.toedter</groupId>
@@ -193,7 +194,15 @@
                                 <property name="docs.output.dir" value="${docs.output.dir}"/>
                                 <property name="project.build.outputDirectory" value="${project.build.outputDirectory}"/>
                                 <property name="basedir" value="${basedir}"/>
-                                <mkdir dir="${docs.output.dir}" />
+
+                                <mkdir dir="${war.output.dir}/groovy"/>
+                                <copy todir="${war.output.dir}/groovy">
+                                    <fileset dir="groovy">
+                                        <include name="*.groovy"/>
+                                    </fileset>
+                                </copy>
+                                
+                                <mkdir dir="${docs.output.dir}"/>
                                 <copy todir="${docs.output.dir}">
                                     <!-- Copy selected Gitblit resources -->
                                     <fileset dir="resources">
@@ -320,7 +329,7 @@
                         </resource>
                     </webResources>
                     <webXml>src/WEB-INF/web.xml</webXml>                    
-                    <packagingExcludes>WEB-INF/lib/jetty-*${jetty.version}.jar</packagingExcludes>
+                    <packagingExcludes>WEB-INF/lib/jetty-*${jetty.version}.jar,WEB-INF/lib/javax.servlet-*.jar</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>
@@ -330,9 +339,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
-        <lucene.version>3.6.1</lucene.version>
+        <!-- dependency versions -->
         <jetty.version>7.6.7.v20120910</jetty.version>
         <jgit.version>2.1.0.201209190230-r</jgit.version>
-        <docs.output.dir>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/docs</docs.output.dir>
+        <lucene.version>3.6.1</lucene.version>
+        <slf4j.version>1.6.6</slf4j.version>
+        <wicket.version>1.4.21</wicket.version>
+        <!-- properties needed for ant -->
+        <war.output.dir>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF</war.output.dir>
+        <docs.output.dir>${war.output.dir}/docs</docs.output.dir>        
     </properties>
 </project>
