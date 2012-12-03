@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.gitblit</groupId>
     <artifactId>gitblit</artifactId>
-    <version>1.1.0-unitedinternet-1</version>
+    <version>1.2.0-unitedinternet-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>GitBlit Repository Manager</name>
     <dependencies>
@@ -75,7 +75,12 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>2.1.0.201209190230-r</version>
+            <version>${jgit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit.http.server</artifactId>
+            <version>${jgit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wicketstuff</groupId>
@@ -143,11 +148,6 @@
             <version>${lucene.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit.http.server</artifactId>
-            <version>2.1.0.201209190230-r</version>
-        </dependency>
-        <dependency>
             <groupId>org.tautua.markdownpapers</groupId>
             <artifactId>markdownpapers-core</artifactId>
             <version>1.2.7</version>
@@ -179,12 +179,144 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>gitblit-generate-docs</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <property name="docs.output.dir" value="${docs.output.dir}"/>
+                                <property name="project.build.outputDirectory" value="${project.build.outputDirectory}"/>
+                                <property name="basedir" value="${basedir}"/>
+                                <mkdir dir="${docs.output.dir}" />
+                                <copy todir="${docs.output.dir}">
+                                    <!-- Copy selected Gitblit resources -->
+                                    <fileset dir="resources">
+                                        <include name="bootstrap/**/*" />
+                                        <include name="gitblit.css" />
+                                        <include name="gitblt_25_white.png" />
+                                        <include name="gitblt-favicon.png" />
+                                        <include name="lock_go_16x16.png" />
+                                        <include name="lock_pull_16x16.png" />
+                                        <include name="shield_16x16.png" />
+                                        <include name="cold_16x16.png" />
+                                        <include name="bug_16x16.png" />
+                                        <include name="book_16x16.png" />
+                                        <include name="blank.png" />
+                                        <include name="federated_16x16.png" />
+                                        <include name="arrow_page.png" />
+                                    </fileset>
+
+                                    <!-- Copy Doc images -->
+                                    <fileset dir="docs">
+                                        <include name="*.png" />
+                                        <include name="*.gif" />
+                                    </fileset>
+                                </copy>
+
+                                <!-- Copy google-code-prettify -->
+                                <mkdir dir="${docs.output.dir}/prettify" />
+                                <copy todir="${docs.output.dir}/prettify">
+                                    <fileset dir="src/com/gitblit/wicket/pages/prettify">
+                                        <exclude name="thumbs.db" />
+                                    </fileset>
+                                </copy>
+
+                                <!-- Build deployment doc pages -->
+                                <java classpath="${project.build.outputDirectory}" classname="com.gitblit.build.BuildSite">
+                                    <classpath refid="maven.compile.classpath" />
+                                    <arg value="--sourceFolder" />
+                                    <arg value="${basedir}/docs" />
+
+                                    <arg value="--outputFolder" />
+                                    <arg value="${docs.output.dir}" />
+
+                                    <arg value="--pageHeader" />
+                                    <arg value="${basedir}/docs/doc_header.html" />
+
+                                    <arg value="--pageFooter" />
+                                    <arg value="${basedir}/docs/doc_footer.html" />
+
+                                    <arg value="--skip" />
+                                    <arg value="screenshots" />
+
+                                    <arg value="--skip" />
+                                    <arg value="releases" />
+
+                                    <arg value="--alias" />
+                                    <arg value="index=overview" />
+
+                                    <arg value="--alias" />
+                                    <arg value="properties=settings" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%VERSION%=${gb.version}" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%GO%=${distribution.zipfile}" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%WAR%=${distribution.warfile}" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%FEDCLIENT%=${fedclient.zipfile}" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%MANAGER%=${manager.zipfile}" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%API%=${gbapi.zipfile}" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%EXPRESS%=${express.zipfile}" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%BUILDDATE%=${gb.versionDate}" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%JGIT%=${jgit.version}" />
+
+                                    <arg value="--properties" />
+                                    <arg value="%PROPERTIES%=${basedir}/distrib/gitblit.properties" />
+
+                                    <arg value="--nomarkdown" />
+                                    <arg value="%BEGINCODE%:%ENDCODE%" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="&quot;%BEGINCODE%=&lt;pre class='prettyprint lang-java'&gt;&quot;" />
+
+                                    <arg value="--substitute" />
+                                    <arg value="%ENDCODE%=&lt;/pre&gt;" />
+				
+                                    <arg value="--regex" />
+                                    <arg value="&quot;\b(issue)(\s*[#]?|-){0,1}(\d+)\b!!!&lt;a href='http://code.google.com/p/gitblit/issues/detail?id=$3'&gt;issue $3&lt;/a&gt;&quot;" />		                                    
+                                </java>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
                     <webResources>
                         <resource>
                             <directory>resources</directory>
+                        </resource>
+                        <resource>
+                            <directory>src</directory>
+                            <targetPath>WEB-INF/classes</targetPath>
+                            <filtering>false</filtering>
+                            <includes>
+                                <include>**/*.html</include>
+                            </includes>
                         </resource>
                     </webResources>
                     <webXml>src/WEB-INF/web.xml</webXml>                    
@@ -200,5 +332,7 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <lucene.version>3.6.1</lucene.version>
         <jetty.version>7.6.7.v20120910</jetty.version>
+        <jgit.version>2.1.0.201209190230-r</jgit.version>
+        <docs.output.dir>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/docs</docs.output.dir>
     </properties>
 </project>
